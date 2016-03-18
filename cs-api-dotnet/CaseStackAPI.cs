@@ -134,7 +134,7 @@ namespace cs_api_dotnet
             };
 
             var response = client.Execute<Carrier>(request);
-            if (response.ErrorException != null)
+            if (response.StatusCode != HttpStatusCode.OK || response.ErrorException != null)
                 throw new HttpException((int)response.StatusCode, "Error retrieving Carrier");
 
             var carrier = response.Data;
@@ -217,7 +217,10 @@ namespace cs_api_dotnet
             if (response.ErrorException != null)
                 throw new HttpException((int)response.StatusCode, "Error retrieving Shipment", response.ErrorException);
 
+           
+
             var shipment = response.Data;
+            shipment.restClient = client;
             return shipment;
         }
 

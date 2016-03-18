@@ -36,7 +36,7 @@ namespace cs_api_dotnet_tests
         [Test]
         public void Construct_CaseStackApi_Url_Is_Staging()
         {
-            Assert.True(_api.ApiEndpoint == "https://app.casestack.io");
+            Assert.True(_api.ApiEndpoint == "https://staging.casestack.io");
         }
 
         [Test]
@@ -130,6 +130,18 @@ namespace cs_api_dotnet_tests
             var carrier = api.GetCarrier("foo");
 
             carrier.carrier_id = "err";
+            Assert.Throws<HttpException>(() => carrier.Save());
+        }
+
+        [Test]
+        public void Carrier_Save_400_Returned_HttpException_Thrown()
+        {
+            var api = new CaseStackApiMock();
+
+            api.Authenticate("foo", "foo");
+            var carrier = api.GetCarrier("foo");
+
+            carrier.carrier_id = "badgateway";
             Assert.Throws<HttpException>(() => carrier.Save());
         }
 
@@ -235,6 +247,23 @@ namespace cs_api_dotnet_tests
             api.Authenticate("foo", "foo");
             var shipment = api.GetShipment(0);
             Assert.IsNotNull(shipment);
+        }
+
+        [Test]
+        public void Save_No_Error()
+        {
+            var api = new CaseStackApiMock();
+            var shipment = api.GetShipment(0);
+            shipment.Save();
+        }
+
+        [Test]
+        public void Save_BadGatewaty_Throws_HttpException()
+        {
+            var api = new CaseStackApiMock();
+            var shipment = api.GetShipment(0);
+            shipment.shipment_id = "-2";
+            Assert.Throws<HttpException>(()=> shipment.Save() );
         }
 
         [Test]

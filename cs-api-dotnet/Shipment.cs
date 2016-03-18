@@ -1,4 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Net;
+using System.Web;
+using Newtonsoft.Json;
+using RestSharp;
 using RestSharp.Deserializers;
 
 namespace cs_api_dotnet
@@ -8,6 +12,8 @@ namespace cs_api_dotnet
     /// </summary>
     public class Shipment : Customizable
     {
+        internal IRestClient restClient;
+
         /// <summary>
         /// Shipment ID
         /// </summary>
@@ -163,6 +169,26 @@ namespace cs_api_dotnet
         /// </summary>
         public List<RouteLog> route_log { get; set; }
 
+        public void Save()
+        {
+            var request = new RestRequest
+            {
+                Method = Method.PUT,
+                Resource = "api/shipment/" + shipment_id,
+                RequestFormat = DataFormat.Json
+            };
+
+            var body = JsonConvert.SerializeObject(new { shipment = this }, new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            });
+
+            request.AddParameter("application/json", body, ParameterType.RequestBody);
+
+            var response = restClient.Execute(request);
+            if (response.ErrorException != null || response.StatusCode != HttpStatusCode.OK)
+                throw new HttpException((int)response.StatusCode, "Error updating shipment", response.ErrorException);
+        }
     }
 
    /// <summary>
