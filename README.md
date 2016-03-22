@@ -60,7 +60,7 @@ Console.WriteLine("Carrier with ID '{0}' has name '{1}' and accounting code '{2}
 
 // get a carrier by ID asynchronously
 const string carrierId = "ec60fa20";
-Carrier carrier = await api.GetCarrier(carrierId);
+Carrier carrier = await api.GetCarrierAsync(carrierId);
 Console.WriteLine("Carrier with ID '{0}' has name '{1}' and accounting code '{2}'", carrierId, carrier.name, carrier.billing.accounting_code);
 
 ```
