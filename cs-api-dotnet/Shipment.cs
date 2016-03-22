@@ -4,6 +4,7 @@ using System.Web;
 using Newtonsoft.Json;
 using RestSharp;
 using RestSharp.Deserializers;
+using System.Threading.Tasks;
 
 namespace cs_api_dotnet
 {
@@ -171,6 +172,19 @@ namespace cs_api_dotnet
 
         public void Save()
         {
+            var request = CreateRequest();
+
+            restClient.Execute(request).HandleResponse();
+        }
+
+        public Task SaveAsync()
+        {
+            var request = CreateRequest();
+            return restClient.ExecuteTaskAsync(request).ContinueWith(prev => prev.Result.HandleResponse());
+        }
+
+        private RestRequest CreateRequest()
+        {
             var request = new RestRequest
             {
                 Method = Method.PUT,
@@ -178,17 +192,16 @@ namespace cs_api_dotnet
                 RequestFormat = DataFormat.Json
             };
 
-            var body = JsonConvert.SerializeObject(new { shipment = this }, new JsonSerializerSettings
+            var body = JsonConvert.SerializeObject(new {shipment = this}, new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore
             });
 
             request.AddParameter("application/json", body, ParameterType.RequestBody);
-
-            var response = restClient.Execute(request);
-            if (response.ErrorException != null || response.StatusCode != HttpStatusCode.OK)
-                throw new HttpException((int)response.StatusCode, "Error updating shipment", response.ErrorException);
+            return request;
         }
+
+       
     }
 
    /// <summary>
