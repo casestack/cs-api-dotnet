@@ -38,15 +38,31 @@ const string customerId = "38fc6a35";
 Customer customer = api.GetCustomer(customerId);
 Console.WriteLine("Customer with ID '{0}' has name '{1}' accounting code '{2}'", customerId, customer.name, customer.billing.accounting_code);
 
+// get a customer by ID asynchronously
+const string customerId = "38fc6a35";
+Customer customer = await api.GetCustomerAsync(customerId);
+Console.WriteLine("Customer with ID '{0}' has name '{1}' accounting code '{2}'", customerId, customer.name, customer.billing.accounting_code);
+
 // get a shipment by ID
 const int shipmentId = 1;
 Shipment shipment = api.GetShipment(shipmentId);
+Console.WriteLine("Shipment with ID '{0}' has status '{1}'", shipmentId, shipment.status);
+
+// get a shipment by ID asynchronously
+const int shipmentId = 1;
+Shipment shipment = await api.GetShipmentAsync(shipmentId);
 Console.WriteLine("Shipment with ID '{0}' has status '{1}'", shipmentId, shipment.status);
 
 // get a carrier by ID
 const string carrierId = "ec60fa20";
 Carrier carrier = api.GetCarrier(carrierId);
 Console.WriteLine("Carrier with ID '{0}' has name '{1}' and accounting code '{2}'", carrierId, carrier.name, carrier.billing.accounting_code);
+
+// get a carrier by ID asynchronously
+const string carrierId = "ec60fa20";
+Carrier carrier = await api.GetCarrier(carrierId);
+Console.WriteLine("Carrier with ID '{0}' has name '{1}' and accounting code '{2}'", carrierId, carrier.name, carrier.billing.accounting_code);
+
 ```
 
 **Updating objects**
@@ -57,10 +73,20 @@ customer.name = "New name";
 customer.custom_fields["c5dca8e0"] = "50";
 customer.Save();
 
+// update a customer asynchronously
+customer.name = "New name";
+customer.custom_fields["c5dca8e0"] = "50";
+await customer.SaveAsync();
+
 // update a carrier
 carrier.name = "New name";
 carrier.custom_fields["f571fcc8"] = "value";
 carrier.Save();
+
+// update a carrier asynchronously
+carrier.name = "New name";
+carrier.custom_fields["f571fcc8"] = "value";
+await carrier.SaveAsync();
 ```
 
 **Locking shipment with ID '1'**
@@ -128,4 +154,20 @@ catch (HttpException exception)
         Console.WriteLine("Customer with ID '{0}' was not found", customerId);
     }
 }
+
+//get a customer async with error handling
+Customer customer = null;
+
+try
+{
+    customer = await api.GetCustomer(customerId);
+}
+catch (HttpException exception)
+{
+    if (exception.GetHttpCode() == 404)
+    {
+        Console.WriteLine("Customer with ID '{0}' was not found", customerId);
+    }
+}
+
 ```
