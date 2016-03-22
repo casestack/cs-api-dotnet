@@ -141,6 +141,8 @@ foreach (string key in carrier.custom_fields.Keys)
 
 **Getting resources in paralell**
 ```C#
+//Warning. The api will throttle you after too many requests
+
 var shipmentIds = new[] {1, 2, 3, 4, 5};
 
 var tasks = new List<Task<Shipment>>();
