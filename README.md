@@ -143,18 +143,16 @@ foreach (string key in carrier.custom_fields.Keys)
 ```C#
 //Warning. The api will throttle you after too many requests
 
-var shipmentIds = new[] {1, 2, 3, 4, 5};
+var shipmentTask = sdk.GetShipmentAsync(0);
+var carrierTask = sdk.GetCarrierAsync("ec60fa20");
 
-var tasks = new List<Task<Shipment>>();
+//Do other work here
 
-foreach (var shipmentId in shipmentIds)
-{
-    tasks.Add(sdk.GetShipmentAsync(shipmentId));
-}
+Task.WaitAll(carrierTask, shipmentTask);
 
-Task.WaitAll(tasks.ToArray());
-
-List<Shipment> shipments =  tasks.Select(t => t.Result).ToList();
+//Access task results here
+var shipment = shipmentTask.Result;
+var carrier = carrierTask.Result;
 ```
 
 **Exception Handling**
