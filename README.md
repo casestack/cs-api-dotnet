@@ -113,6 +113,11 @@ This only has to be done once. It can be retrieved and cached through the life-c
 CustomFields carrierCustomFields = api.GetCustomFields<Carrier>();
 CustomFields customerCustomFields = api.GetCustomFields<Customer>();
 CustomFields shipmentCustomFields = api.GetCustomFields<Shipment>();
+
+//asynchronously
+CustomFields carrierCustomFields = await api.GetCustomFieldsAsync<Carrier>();
+CustomFields customerCustomFields = await api.GetCustomFieldsAsync<Customer>();
+CustomFields shipmentCustomFields = await api.GetCustomFieldsAsync<Shipment>();
 ```
 
 Note: An object bust be of type "Customizable" in order to retrieve custom fields.
@@ -133,6 +138,22 @@ foreach (string key in carrier.custom_fields.Keys)
     Console.WriteLine("\t => {0}: {1} ({2})", field.name, value, field.type);
 }
 ```	
+
+**Getting resources in paralell**
+```C#
+var shipmentIds = new[] {1, 2, 3, 4, 5};
+
+var tasks = new List<Task<Shipment>>();
+
+foreach (var shipmentId in shipmentIds)
+{
+    tasks.Add(sdk.GetShipmentAsync(shipmentId));
+}
+
+Task.WaitAll(tasks.ToArray());
+
+List<Shipment> shipments =  tasks.Select(t => t.Result).ToList();
+```
 
 **Exception Handling**
 
