@@ -118,7 +118,6 @@ namespace cs_api_dotnet_tests
         {
             var api = new CaseStackApiMock();
             var carrier = await api.GetCarrierAsync("foo");
-            //var carrier = carrierTask.Result;
             Assert.IsNotNull(carrier);
         }
 
