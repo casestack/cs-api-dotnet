@@ -1,6 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Net;
+using System.Runtime.Remoting.Messaging;
+using System.Threading.Tasks;
 using System.Web;
 using RestSharp;
 using RestSharp.Authenticators;
@@ -121,25 +123,36 @@ namespace cs_api_dotnet
         /// <returns>Carrier Object</returns>
         public Carrier GetCarrier(string carrierId)
         {
-
-            if (String.IsNullOrEmpty(carrierId))
-                throw new ArgumentNullException("carrierId");
+            var request = CreateRestRequest<Carrier>(carrierId);
 
             var client = GetRestClient();
-            var request = new RestRequest
-            {
-                Resource = "api/carrier/" + carrierId,
-                RequestFormat = DataFormat.Json,
-                RootElement = "Carrier"
-            };
 
-            var response = client.Execute<Carrier>(request);
-            if (response.StatusCode != HttpStatusCode.OK || response.ErrorException != null)
-                throw new HttpException((int)response.StatusCode, "Error retrieving Carrier");
+            var response = client.Execute<Carrier>(request).HandleResponse();
+       
+            response.Data.restClient = client;
+            return response.Data;
+        }
 
-            var carrier = response.Data;
-            carrier.restClient = client;
-            return carrier;
+        /// <summary>
+        /// Get Carrier by ID
+        /// </summary>
+        /// <param name="carrierId">Carrier ID</param>
+        /// <returns>Task for get Carrier Object</returns>
+        public Task<Carrier> GetCarrierAsync(string carrierId)
+        {
+            var request = CreateRestRequest<Carrier>(carrierId);
+
+            var client = GetRestClient();
+
+            var response = client.ExecuteTaskAsync<Carrier>(request).ContinueWith(
+                previoustask =>
+                {
+                    var data = previoustask.Result.HandleResponse().Data;
+                    previoustask.Result.Data.restClient = client;
+                    return data;
+                });
+
+            return response;
         }
 
         /// <summary>
@@ -149,24 +162,37 @@ namespace cs_api_dotnet
         /// <returns>Custom Fields Object</returns>
         public CustomFields GetCustomFields<T>() where T : Customizable
         {
-            var parent = typeof (T).Name.ToLower();
+            var parent = typeof (T).Name;
             var client = GetRestClient();
             var request = new RestRequest
             {
-                Resource = "api/customfield/" + parent,
+                Resource = "api/customfield/" + parent.ToLower(),
                 RequestFormat = DataFormat.Json,
-                RootElement = "Carrier"
+                RootElement = parent
             };
 
-            var response = client.Execute<CustomFields>(request);
-            if (response.ErrorException != null)
-            {
-                throw new HttpException((int)response.StatusCode, "Error retrieving custom fields", response.ErrorException);
-              
-            }
+            return client.Execute<CustomFields>(request).HandleResponse().Data;
+        }
 
-            var customFields = response.Data;
-            return customFields;
+        /// <summary>
+        /// Get Custom Fields for an object type
+        /// </summary>
+        /// <typeparam name="T">Classs must be of type Customizable</typeparam>
+        /// <returns>Custom Fields Object</returns>
+        public Task<CustomFields> GetCustomFieldsAsync<T>() where T : Customizable
+        {
+            var parent = typeof(T).Name;
+            var client = GetRestClient();
+            var request = new RestRequest
+            {
+                Resource = "api/customfield/" + parent.ToLower(),
+                RequestFormat = DataFormat.Json,
+                RootElement = parent
+            };
+
+            return client.ExecuteTaskAsync<CustomFields>(request).ContinueWith(previousTask => previousTask.Result.HandleResponse().Data);
+
+            
         }
 
         /// <summary>
@@ -176,26 +202,57 @@ namespace cs_api_dotnet
         /// <returns>Customer Object</returns>
         public Customer GetCustomer(string customerId)
         {
-            if (String.IsNullOrEmpty(customerId))
-            {
-                throw new ArgumentNullException("customerId");
-            }
+            var request = CreateRestRequest<Customer>(customerId);
 
             var client = GetRestClient();
-            var request = new RestRequest
+
+            var response = client.Execute<Customer>(request).HandleResponse();
+
+            response.Data.restClient = client;
+            return response.Data;
+        }
+
+        /// <summary>
+        /// Get Customer by ID
+        /// </summary>
+        /// <param name="customerId">Customer ID</param>
+        /// <returns>Task Customer Object</returns>
+        public Task<Customer> GetCustomerAsync(string customerId)
+        {
+            var request = CreateRestRequest<Customer>(customerId);
+
+            var client = GetRestClient();
+
+            var responseTask = client.ExecuteTaskAsync<Customer>(request).ContinueWith(previousTask =>
             {
-                Resource = "api/customer/" + customerId,
-                RequestFormat = DataFormat.Json,
-                RootElement = "Customer"
-            };
+                var data = previousTask.Result.HandleResponse().Data;
+                data.restClient = client;
+                return data;
+            });
 
-            var response = client.Execute<Customer>(request);
-            if (response.ErrorException != null)
-                throw new HttpException((int)response.StatusCode, "Error retrieving Customer");
+            return responseTask;
+        }
 
-            var customer = response.Data;
-            customer.restClient = client;
-            return customer;
+        /// <summary>
+        /// Get Shipment by ID
+        /// </summary>
+        /// <param name="shipmentId">Shipment ID</param>
+        /// <returns>Shipment Object</returns>
+        public Task<Shipment> GetShipmentAsync(int shipmentId)
+        {
+            var request = CreateRestRequest<Shipment>(shipmentId);
+
+            var client = GetRestClient();
+
+            var response = client.ExecuteTaskAsync<Shipment>(request).ContinueWith(previousTask =>
+                    {
+                        var data = previousTask.Result.HandleResponse().Data;
+                        data.restClient = client;
+                        return data;
+                    }
+                );
+
+            return response;
         }
 
         /// <summary>
@@ -205,23 +262,15 @@ namespace cs_api_dotnet
         /// <returns>Shipment Object</returns>
         public Shipment GetShipment(int shipmentId)
         {
+            var request = CreateRestRequest<Shipment>(shipmentId);
+            
             var client = GetRestClient();
-            var request = new RestRequest
-            {
-                Resource = "api/shipment/" + shipmentId,
-                RequestFormat = DataFormat.Json,
-                RootElement = "Shipment"
-            };
-
-            var response = client.Execute<Shipment>(request);
-            if (response.ErrorException != null)
-                throw new HttpException((int)response.StatusCode, "Error retrieving Shipment", response.ErrorException);
-
            
+            var response =  client.Execute<Shipment>(request).HandleResponse();
 
-            var shipment = response.Data;
-            shipment.restClient = client;
-            return shipment;
+            response.Data.restClient = client;
+
+            return response.Data;
         }
 
         /// <summary>
@@ -230,6 +279,7 @@ namespace cs_api_dotnet
         /// </summary>
         /// <param name="shipmentId">Shipment ID</param>
         /// <param name="isLocked">Lock or Unlock</param>
+        [Obsolete(" Set readonly property on shipment object and use Shipment.Save() instead")]  
         public void LockShipment(int shipmentId, bool isLocked)
         {
             var client = GetRestClient();
@@ -242,9 +292,8 @@ namespace cs_api_dotnet
 
             request.AddParameter("readonly", isLocked.ToString().ToLower());
 
-            var response = client.Execute(request);
-            if (response.ErrorException != null)
-                throw new HttpException((int)response.StatusCode, "Error locking/unlocking Shipment", response.ErrorException);
+            client.Execute(request).HandleResponse();
+           
         }
 
         /// <summary>
@@ -252,6 +301,8 @@ namespace cs_api_dotnet
         /// </summary>
         /// <param name="shipmentId">Shipment ID</param>
         /// <param name="status">Shipment Status</param>
+        /// 
+        [Obsolete(" Set status property on shipment object and use Shipment.Save() instead")]      
         public void SetShipmentStatus(int shipmentId, ShipmentStatus status)
         {
             var client = GetRestClient();
@@ -264,9 +315,7 @@ namespace cs_api_dotnet
 
             request.AddParameter("status", status.ToFriendlyName());
 
-            var response = client.Execute(request);
-            if (response.ErrorException != null)
-                throw new HttpException((int)response.StatusCode, "Error updating status of Shipment", response.ErrorException);
+            client.Execute(request).HandleResponse();
         }
 
         /// <summary>
@@ -276,20 +325,49 @@ namespace cs_api_dotnet
         /// <returns>Address Object</returns>
         public Address GetAddress(string addressId)
         {
+            var request = CreateRestRequest<Address>(addressId);
             var client = GetRestClient();
+            
+           return client.Execute<Address>(request).HandleResponse().Data;
+        }
+
+        /// <summary>
+        /// Get Address by ID
+        /// </summary>
+        /// <param name="addressId"></param>
+        /// <returns>Task Address Object</returns>
+        public Task<Address> GetAddressAsync(string addressId)
+        {
+            var request = CreateRestRequest<Address>(addressId);
+            var client = GetRestClient();
+
+            return client.ExecuteTaskAsync<Address>(request).ContinueWith(prev=>prev.Result.HandleResponse().Data);
+        }
+
+
+        private static IRestRequest CreateRestRequest<T>(string id, Method method = Method.GET)
+        {
+            string type = typeof(T).Name;
+            if (String.IsNullOrEmpty(id))
+                throw new ArgumentNullException(type + " id");
+
+
             var request = new RestRequest
             {
-                Resource = "api/address/" + addressId,
+                Resource = "api/" + type.ToLower() + "/" + id,
                 RequestFormat = DataFormat.Json,
-                RootElement = "Address"
+                RootElement = type,
+                Method = method
             };
 
-            var response = client.Execute<Address>(request);
-            if (response.ErrorException != null || response.StatusCode != HttpStatusCode.OK)
-                throw new HttpException((int)response.StatusCode, "Error retrieving Address", response.ErrorException);
-
-            var address = response.Data;
-            return address;
+            return request;
         }
+
+        private static IRestRequest CreateRestRequest<T>(int id, Method method = Method.GET)
+        {
+            return CreateRestRequest<T>(id.ToString(), method);
+        }
+
+        
     }
 }

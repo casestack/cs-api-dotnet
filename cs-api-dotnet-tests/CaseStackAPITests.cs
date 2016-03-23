@@ -17,11 +17,13 @@ namespace cs_api_dotnet_tests
     public class CaseStackAPITests
     {
         private CaseStackApi _api;
+        private CaseStackApiMock _apiMock;
 
         [SetUp]
         public void Setup()
         {
             _api = new CaseStackApi(useStagingEndpoint: true);
+            _apiMock = new CaseStackApiMock();
         }
 
         #region Constructor Tests
@@ -112,12 +114,61 @@ namespace cs_api_dotnet_tests
         }
 
         [Test]
+        public async Task GetCarrierAsync_Data_Valid()
+        {
+            var api = new CaseStackApiMock();
+            var carrier = await api.GetCarrierAsync("foo");
+            Assert.IsNotNull(carrier);
+        }
+
+        [Test]
+        public void GetCarrier_RootElement_Carrier()
+        {
+           _apiMock.GetCarrier("foo");
+           Assert.True(_apiMock.Request.RootElement == "Carrier");
+        }
+
+        [Test]
+        public async Task GetCarrierAsync_RootElement_Carrier()
+        {
+            await _apiMock.GetCarrierAsync("foo");
+            Assert.True(_apiMock.Request.RootElement == "Carrier");
+        }
+
+
+        [Test]
+        public void GetCarrier_Resource_Correct()
+        {
+            _apiMock.GetCarrier("foo");
+
+            Assert.True(_apiMock.Request.Resource == "api/carrier/foo");
+        }
+
+        [Test]
+        public async Task GetCarrierAsync_Resource_Correct()
+        {
+            await _apiMock.GetCarrierAsync("foo");
+
+            Assert.True(_apiMock.Request.Resource == "api/carrier/foo");
+        }
+
+        [Test]
         public void GetCarrier_Throws_HttpException()
         {
             var api = new CaseStackApiMock();
 
             api.Authenticate("foo", "foo");
             var exception = Assert.Throws<HttpException>(() => api.GetCarrier("err"));
+            Assert.True(500 == exception.GetHttpCode());
+        }
+
+        [Test]
+        public async Task GetCarrierAsync_Throws_HttpException()
+        {
+            var api = new CaseStackApiMock();
+
+     
+            var exception = Assert.ThrowsAsync<HttpException>(() => api.GetCarrierAsync("err"));
             Assert.True(500 == exception.GetHttpCode());
         }
 
@@ -134,11 +185,22 @@ namespace cs_api_dotnet_tests
         }
 
         [Test]
-        public void Carrier_Save_400_Returned_HttpException_Thrown()
+        public async Task Carrier_SaveAsync_HttpException_Thrown()
         {
             var api = new CaseStackApiMock();
 
             api.Authenticate("foo", "foo");
+            var carrier = api.GetCarrier("foo");
+
+            carrier.carrier_id = "err";
+            Assert.ThrowsAsync<HttpException>(() => carrier.SaveAsync());
+        }
+
+        [Test]
+        public void Carrier_Save_400_Returned_HttpException_Thrown()
+        {
+            var api = new CaseStackApiMock();
+
             var carrier = api.GetCarrier("foo");
 
             carrier.carrier_id = "badgateway";
@@ -146,13 +208,32 @@ namespace cs_api_dotnet_tests
         }
 
         [Test]
+        public async Task Carrier_SaveAsync_400_Returned_HttpException_Thrown()
+        {
+            var api = new CaseStackApiMock();
+
+            var carrier = api.GetCarrier("foo");
+
+            carrier.carrier_id = "badgateway";
+            Assert.ThrowsAsync<HttpException>(() => carrier.SaveAsync());
+        }
+
+        [Test]
         public void Carrier_Save_No_Error()
         {
             var api = new CaseStackApiMock();
 
-            api.Authenticate("foo", "foo");
             var carrier = api.GetCarrier("foo");
             carrier.Save();
+        }
+
+        [Test]
+        public async Task Carrier_SaveAsync_No_Error()
+        {
+            var api = new CaseStackApiMock();
+
+            var carrier = api.GetCarrier("foo");
+            await carrier.SaveAsync();
         }
 
         #endregion
@@ -166,9 +247,21 @@ namespace cs_api_dotnet_tests
         }
 
         [Test]
+        public async Task GetCustomerAsync_CustomerId_Empty_Throws_ArgumentNullException()
+        {
+            Assert.ThrowsAsync<ArgumentNullException>(() => _api.GetCustomerAsync(string.Empty));
+        }
+
+        [Test]
         public void GetCustomer_CustomerId_Null_Throws_ArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => _api.GetCustomer(null));
+        }
+
+        [Test]
+        public void GetCustomerAsync_CustomerId_Null_Throws_ArgumentNullException()
+        {
+            Assert.ThrowsAsync<ArgumentNullException>(() => _api.GetCustomerAsync(null));
         }
 
         [Test]
@@ -176,8 +269,15 @@ namespace cs_api_dotnet_tests
         {
             var api = new CaseStackApiMock();
 
-            api.Authenticate("foo", "foo");
             var customer = api.GetCustomer("foo");
+            Assert.IsNotNull(customer);
+        }
+
+        [Test]
+        public async Task GetCustomerAsync_Customer_NotNull()
+        {
+            var api = new CaseStackApiMock();
+            var customer = await api.GetCustomerAsync("foo");
             Assert.IsNotNull(customer);
         }
 
@@ -185,8 +285,6 @@ namespace cs_api_dotnet_tests
         public void Customer_Save_HttpException_Thrown()
         {
             var api = new CaseStackApiMock();
-
-            api.Authenticate("foo", "foo");
             var customer = api.GetCustomer("foo");
 
             customer.customer_id = "err";
@@ -194,13 +292,29 @@ namespace cs_api_dotnet_tests
         }
 
         [Test]
+        public void Customer_SaveAsync_HttpException_Thrown()
+        {
+            var api = new CaseStackApiMock();
+            var customer = api.GetCustomer("foo");
+
+            customer.customer_id = "err";
+            Assert.ThrowsAsync<HttpException>(() => customer.SaveAsync());
+        }
+
+        [Test]
         public void Customer_Save_No_Error()
         {
             var api = new CaseStackApiMock();
-
-            api.Authenticate("foo", "foo");
             var customer = api.GetCustomer("foo");
             customer.Save();
+        }
+
+        [Test]
+        public async Task Customer_SaveAsync_No_Error()
+        {
+            var api = new CaseStackApiMock();
+            var customer = api.GetCustomer("foo");
+            await customer.SaveAsync();
         }
 
         [Test]
@@ -210,6 +324,14 @@ namespace cs_api_dotnet_tests
 
             api.Authenticate("foo", "foo");
             var exception = Assert.Throws<HttpException>(() => api.GetCustomer("err"));
+            Assert.True(500 == exception.GetHttpCode());
+        }
+
+        [Test]
+        public void GetCustomerAsync_Throws_HttpException()
+        {
+            var api = new CaseStackApiMock();
+            var exception = Assert.ThrowsAsync<HttpException>(() => api.GetCustomerAsync("err"));
             Assert.True(500 == exception.GetHttpCode());
         }
 
@@ -225,6 +347,13 @@ namespace cs_api_dotnet_tests
         }
 
         [Test]
+        public async Task GetCustomFieldsAsync_Carrier_No_Errors()
+        {
+            var api = new CaseStackApiMock();
+            await api.GetCustomFieldsAsync<Carrier>();
+        }
+
+        [Test]
         public void GetCustomFields_Throws_HttpException()
         {
 
@@ -235,17 +364,65 @@ namespace cs_api_dotnet_tests
             Assert.True(500 == exception.GetHttpCode());
         }
 
+        [Test]
+        public void GetCustomFieldsAsync_Throws_HttpException()
+        {
+
+            var api = new CaseStackApiMock();
+
+            api.Authenticate("foo", "foo");
+            var exception = Assert.ThrowsAsync<HttpException>(() => api.GetCustomFieldsAsync<TestError>());
+            Assert.True(500 == exception.GetHttpCode());
+        }
+
         #endregion
 
         #region Shipment Tests
 
         [Test]
+        public void GetShipment_RootElement_Shipment()
+        {
+            _apiMock.GetShipment(0);
+            Assert.True(_apiMock.Request.RootElement == "Shipment");
+        }
+
+        [Test]
+        public async Task  GetShipmentAsync_RootElement_Shipment()
+        {
+            await _apiMock.GetShipmentAsync(0);
+            Assert.True(_apiMock.Request.RootElement == "Shipment");
+        }
+
+        [Test]
+        public void GetShipment_Resource_Correct()
+        {
+            _apiMock.GetShipment(0);
+
+            Assert.True(_apiMock.Request.Resource == "api/shipment/0");
+        }
+
+        [Test]
+        public async Task GetShipmentAsync_Resource_Correct()
+        {
+            await _apiMock.GetShipmentAsync(0);
+
+            Assert.True(_apiMock.Request.Resource == "api/shipment/0");
+        }
+
+        [Test]
         public void GetShipment_Data_Valid()
         {
             var api = new CaseStackApiMock();
-
-            api.Authenticate("foo", "foo");
             var shipment = api.GetShipment(0);
+            Assert.IsNotNull(shipment);
+        }
+
+        [Test]
+        public async Task GetShipmentAsync_Data_Valid()
+        {
+            var api = new CaseStackApiMock();
+
+            var shipment = await api.GetShipmentAsync(0);
             Assert.IsNotNull(shipment);
         }
 
@@ -258,6 +435,14 @@ namespace cs_api_dotnet_tests
         }
 
         [Test]
+        public async Task SaveAsync_No_Error()
+        {
+            var api = new CaseStackApiMock();
+            var shipment = api.GetShipment(0);
+            await shipment.SaveAsync();
+        }
+
+        [Test]
         public void Save_BadGatewaty_Throws_HttpException()
         {
             var api = new CaseStackApiMock();
@@ -267,14 +452,35 @@ namespace cs_api_dotnet_tests
         }
 
         [Test]
+        public void SaveAsync_BadGatewaty_Throws_HttpException()
+        {
+            var api = new CaseStackApiMock();
+            var shipment = api.GetShipment(0);
+            shipment.shipment_id = "-2";
+            Assert.ThrowsAsync<HttpException>(() => shipment.SaveAsync());
+        }
+
+        [Test]
         public void GetShipment_Throws_HttpException()
         {
             var api = new CaseStackApiMock();
-
-            api.Authenticate("foo", "foo");
             var exception = Assert.Throws<HttpException>(() => api.GetShipment(-1));
             Assert.True(500 == exception.GetHttpCode());
         }
+
+        [Test]
+        public void GetShipmentAsync_Throws_HttpException()
+        {
+            var api = new CaseStackApiMock();
+
+            var exception = Assert.ThrowsAsync<HttpException>(() => api.GetShipmentAsync(-1));
+            Assert.True(500 == exception.GetHttpCode());
+        }
+
+       
+        #endregion
+
+        #region SetShipmentStatus Tests
 
         [Test]
         public void SetShipmentStatus_Throws_HttpException()
@@ -289,11 +495,6 @@ namespace cs_api_dotnet_tests
             var api = new CaseStackApiMock();
             api.SetShipmentStatus(0, CaseStackApi.ShipmentStatus.Archived);
         }
-
-        #endregion
-
-        #region SetShipmentStatus Tests
-
 
 
         #endregion
@@ -330,10 +531,24 @@ namespace cs_api_dotnet_tests
         }
 
         [Test]
+        public void GetAddressAsync_HttpException_Thrown()
+        {
+            var api = new CaseStackApiMock();
+            Assert.ThrowsAsync<HttpException>(() => api.GetAddressAsync("error"));
+        }
+
+        [Test]
         public void GetAddress_Error_Not_Thrown()
         {
             var api = new CaseStackApiMock();
             api.GetAddress("foo");
+        }
+
+        [Test]
+        public async Task GetAddressAsync_Error_Not_Thrown()
+        {
+            var api = new CaseStackApiMock();
+            await api.GetAddressAsync("foo");
         }
 
         #endregion
