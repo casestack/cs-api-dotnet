@@ -19,7 +19,7 @@ namespace cs_api_dotnet
         /// Shipment ID
         /// </summary>
         public string shipment_id { get; set; }
-        
+
         /// <summary>
         /// User who created shipment
         /// </summary>
@@ -89,7 +89,7 @@ namespace cs_api_dotnet
         /// Mode of Transportation for shipment
         /// </summary>
         public string mode { get; set; }
-        
+
         /// <summary>
         /// Freight Charge Payment terms. Can be one of three options: "thirdparty", "collect" or "prepaid"
         /// </summary>
@@ -201,7 +201,7 @@ namespace cs_api_dotnet
             return request;
         }
 
-       
+
     }
 
    /// <summary>
@@ -213,7 +213,7 @@ namespace cs_api_dotnet
         /// Unit of Measurement for all dimensions
         /// </summary>
         public string dimensions { get; set; }
-        
+
         /// <summary>
         /// Unit of Measurement for all weights
         /// </summary>
@@ -226,7 +226,7 @@ namespace cs_api_dotnet
     public class Truckload
     {
         /// <summary>
-        /// List of equipment required 
+        /// List of equipment required
         /// </summary>
         public List<string> equipment_required { get; set; }
 
@@ -242,7 +242,7 @@ namespace cs_api_dotnet
     public class Space
     {
         /// <summary>
-        /// Shipment requires a Full truck 
+        /// Shipment requires a Full truck
         /// </summary>
         public bool full { get; set; }
 
@@ -282,7 +282,7 @@ namespace cs_api_dotnet
         /// Summation of weights of all items
         /// </summary>
         public double total_weight { get; set; }
-        
+
         /// <summary>
         /// Total stops
         /// </summary>
@@ -312,9 +312,9 @@ namespace cs_api_dotnet
         /// Profit margin (as USD)
         /// </summary>
         public double margin_dollars { get; set; }
-        
+
         /// <summary>
-        /// Profilt margin (as percentage) 
+        /// Profilt margin (as percentage)
         /// </summary>
         public double margin_percent { get; set; }
 
@@ -338,10 +338,10 @@ namespace cs_api_dotnet
     {
         /// <summary>
         /// Type of charge. Can be one of the following:
-        /// "Detention Charge", "Equipment Ordered Not Used", "Fuel Surcharge", "Shipping", "Other", "Disposal Charge", 
-        /// "Excess Weight", "Freeze Protection", "Freight Charge", "Hazardous Materials", "Layover Charge", 
-        /// "Loading/Unloading Charge", "Lumper Charge", "Mileage Rates", "Minimum Charge", "Pallet Exchange", 
-        /// "Reconsignment Charge", "Refusal Charge", "Scale Charge", "Stop-off Charge", "Tarp Charge", 
+        /// "Detention Charge", "Equipment Ordered Not Used", "Fuel Surcharge", "Shipping", "Other", "Corrected BOL", "Disposal Charge",
+        /// "Excess Weight", "Freeze Protection", "Freight Charge", "Hazardous Materials", "Hourly Rate", "Layover Charge",
+        /// "Loading/Unloading Charge", "Lumper Charge", "Mileage Rates", "Minimum Charge", "Pallet Exchange",
+        /// "Reconsignment Charge", "Refusal Charge", "Re-Class", "Re-Weigh", "Scale Charge", "Stop-off Charge", "Tarp Charge",
         /// "Team Driver Service", "Temperature Control", "Tolls"
         /// </summary>
         public string type { get; set; }
@@ -408,9 +408,9 @@ namespace cs_api_dotnet
 
         /// <summary>
         /// Packaging Type. Can be one of the following:
-        /// "FAK", "Bag", "Bale", "Barrel", "Basket", "Bin", "Box", "Bunch", "Bundle", "Cabinet", "Can", "Carboy", 
-        /// "Carrier", "Carton", "Case", "Cask", "Container", "Coil", "Crate", "Cylinder", "Drum", "Each", "Loose", 
-        /// "Other", "Package", "Pail", "Pallet", "Pieces", "Pipe Line", "Rack", "Reel", "Roll", "Skid", "Spool", 
+        /// "FAK", "Bag", "Bale", "Barrel", "Basket", "Bin", "Box", "Bunch", "Bundle", "Cabinet", "Can", "Carboy",
+        /// "Carrier", "Carton", "Case", "Cask", "Container", "Coil", "Crate", "Cylinder", "Drum", "Each", "Loose",
+        /// "Other", "Package", "Pail", "Pallet", "Pieces", "Pipe Line", "Rack", "Reel", "Roll", "Skid", "Spool",
         /// "Tank", "Tube", "Totes", "Unit", "Van Pack", "Wrapped"
 
         /// </summary>
@@ -458,7 +458,7 @@ namespace cs_api_dotnet
         /// NMFC Sub
         /// </summary>
         public double nmfc_sub { get; set; }
-        
+
         /// <summary>
         /// Is item Hazardous
         /// </summary>
@@ -478,7 +478,7 @@ namespace cs_api_dotnet
         public string matrix { get; set; }
 
         /// <summary>
-        /// Miles 
+        /// Miles
         /// </summary>
         public double miles { get; set; }
 
@@ -599,7 +599,7 @@ namespace cs_api_dotnet
         /// If carrier has reached this stop
         /// </summary>
         public bool carrier_reached { get; set; }
-        
+
         /// <summary>
         /// Timestamp of actual arrival (unix epoch)
         /// </summary>
