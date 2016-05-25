@@ -624,6 +624,11 @@ namespace cs_api_dotnet
         /// Number used by carriers as a reference
         /// </summary>
         public string pro { get; set; }
+
+        /// <summary>
+        /// Timestamp of estimated arrival (unix epoch)
+        /// </summary>
+        public long estimated_arrival { get; set; }
     }
 
     /// <summary>
